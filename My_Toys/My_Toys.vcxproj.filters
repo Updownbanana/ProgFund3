@@ -21,9 +21,15 @@
     <ClCompile Include="MinesweeperBoard.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MinesweeperGame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MinesweeperBoard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MinesweeperGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

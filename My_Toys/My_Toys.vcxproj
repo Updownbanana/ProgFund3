@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -128,10 +128,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="MinesweeperBoard.cpp" />
+    <ClCompile Include="MinesweeperGame.cpp" />
     <ClCompile Include="My_Toys.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MinesweeperBoard.h" />
+    <ClInclude Include="MinesweeperGame.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

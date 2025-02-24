@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cassert>
 #include <algorithm>
+#include <string>
 
 using namespace std;
 
@@ -47,7 +48,24 @@ int partition(int pivotIndex, int arr[], int start, int end) {
 
 	// TODO: finish
 
-	return pivotIndex;
+	if (arr[start] > arr[end]) {
+		swap(arr[start], arr[end]);
+		if (start == pivotIndex) {
+			pivotIndex = end;
+		}
+		else if (end == pivotIndex) {
+			pivotIndex = start;
+		}
+	}
+	
+	if (arr[start] > pivotValue or start == pivotIndex) {
+		return partition(pivotIndex, arr, start, end - 1);
+	}
+	else if (arr[end] < pivotValue or end == pivotIndex) {
+		return partition(pivotIndex, arr, start + 1, end);
+	}
+
+	return partition(pivotIndex, arr, start + 1, end - 1);
 }
 
 // Quickly finds the k-th smallest value without sorting the entire array.
@@ -58,7 +76,7 @@ int partition(int pivotIndex, int arr[], int start, int end) {
 // end: end index of the array
 int findKthSmallestValue(int k, int arr[], int start, int end) {
 	int n = (end + 1) - start;
-	if (n == 0 || k >= n) {
+	if (n == 0) {
 		throw runtime_error("Invalid input.");
 	}
 
@@ -71,24 +89,24 @@ int findKthSmallestValue(int k, int arr[], int start, int end) {
 
 	int pivotIndex = partition(chosenPivotIndex, arr, start, end);
 
-	int s1 = pivotIndex - start;
+	//int s1 = pivotIndex - start;
 
-	// Base case where s1 == k.
-	if (s1 == k) {
+	// Base case where s1 == k (what's the point of s1?).
+	if (pivotIndex == k) {
 		// TODO: Replace -1 with the value for the base case.
-		return -1;
+		return arr[pivotIndex];
 	}
 
 	// Figure out which segment the kth smallest is in and recurse.
 	// Note that the pivot is not included in s1 or s2. This guarantees that the problem reduces while recursing.
 	// TODO: Replace true with a boolean expression that determines which segment to recurse into.
-	if (true) {
+	if (pivotIndex > k) {
 		// TODO: Replace -1 with a recursive call to findKthSmallestValue.
-		return -1;
+		return findKthSmallestValue(k, arr, start, pivotIndex-1);
 	}
 	else {
 		// TODO: Replace -1 with a recursive call to findKthSmallestValue.
-		return -1;
+		return findKthSmallestValue(k, arr, pivotIndex+1, end);
 	}
 }
 
@@ -173,7 +191,10 @@ int fibonacci(int n) {
 	return fibonacci(n - 1) + fibonacci(n - 2);
 }
 
-int towers(int rings, int source, int spare, int dest) {
+int towers(int rings, int source = -1, int spare = 0, int dest = 0) {
+	if (source < 0) {
+		source = rings;
+	}
 	if (rings == 1) {
 		source -= 1;
 		dest += 1;
@@ -200,19 +221,35 @@ void testFibonacci() {
 }
 
 void testTowers() {
-	assert(towers(1, 1, 0, 0) == 1);
-	assert(towers(3, 3, 0, 0) == 7);
+	assert(towers(1) == 1);
+	assert(towers(3) == 7);
+	assert(towers(5) == 31);
+}
+
+void towersBigO(const int depth) {
+	for (int i = 1; i <= depth; i++) {
+		cout << "towers(" << i << "): " << towers(i) << endl;
+	}
+}
+
+void testPartition() {
+	int* testArr = new int[10] {9, 7, 5, 1, 8, 2, 4, 3, 6, 10};
+	assert(partition(2, testArr, 0, 9) == 4);
+	delete[] testArr;
 }
 
 int main() {
 	testFactorial();
 	testFibonacci();
 	testTowers();
+	testPartition();
 
 	// Seed the random number generator
 	srand(0);
 
 	// Only need to test the first few array sizes to fully test per the minimal testing equivalence class.
-	//testFindKthSmallestValue(3, 5);
+	testFindKthSmallestValue(3, 5);
+
+	towersBigO(10);
 	return 0;
 }

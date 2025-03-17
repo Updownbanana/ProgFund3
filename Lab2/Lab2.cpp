@@ -29,15 +29,16 @@ public:
     }
 
     bool isEmpty() const override {
-        // TODO
-        return false;
+        return topIndex < 0;
     }
 
     void push(const T& value) override {
         if (topIndex == N) {
             throw std::length_error("Max array exceeded.");
         }
-        // TODO
+        // TODO move semantics
+        topIndex += 1;
+        array[topIndex] = value;
     }
 
     T peek() const override {
@@ -45,15 +46,14 @@ public:
             throw std::logic_error("Peek on empty ArrayStack.");
         }
 
-        // TODO
-        return {};
+        return array[topIndex];
     }
 
     bool pop() override {
         if (isEmpty()) {
             return false;
         }
-        // TODO
+        topIndex -= 1;
         return true;
     }
 };
@@ -110,38 +110,55 @@ public:
 
     // Copy constructor
     ListStack(const ListStack& other) {
-        // TODO
+        if (other.top == nullptr) {
+            top = nullptr;
+            return;
+        }
+        top = new Node<T>(other.top->getValue());
+        Node<T>* lastCopy = top;
+        Node<T>* nodeToCopy = other.top->getNext();
+        while (nodeToCopy != nullptr) {
+            Node<T>* newCopy = new Node<T>(nodeToCopy->getValue());
+            nodeToCopy = nodeToCopy->getNext();
+            lastCopy->setNext(newCopy);
+            lastCopy = newCopy;
+        }
+        lastCopy->setNext(nullptr);
     }
 
     // Move constructor, Hint: Don't forget to make a "hollow" data structure.
     ListStack(ListStack&& other) noexcept {
-        // TODO
+        top = other.top;
+        other.top = nullptr;
     }
 
     bool isEmpty() const override {
-        // TODO
-        return false;
+        return top == nullptr;
     }
 
     void push(const T& value) override {
-        // TODO
+        Node<T>* newNode;
+        newNode = new Node<T>(value, top);
+        top = newNode;
+        newNode = nullptr;
     }
 
     T peek() const override {
         if (isEmpty()) {
-            throw std::logic_error("Peek on empty ArrayStack.");
+            throw std::logic_error("Peek on empty ListStack.");
         }
-
-        // TODO
-        return {};
+        return top->getValue();
     }
 
     bool pop() override {
         if (isEmpty()) {
             return false;
         }
-
-        // TODO
+        
+        Node<T>* oldTop = top;
+        top = top->getNext();
+        delete oldTop;
+        oldTop = nullptr;
         return true;
     }
 };
@@ -177,8 +194,20 @@ void testListStack() {
 }
 
 bool areCurleyBracesMatched(const string& inputString) {
-    // TODO
-    return false;
+    ArrayStack<char, MIN_ARRAY_SIZE> stack;
+    for (int i = 0; i < inputString.length(); i++) {
+        char thisChar = inputString[i];
+        if (thisChar == '{') {
+            stack.push(thisChar);
+        }
+        else if (thisChar == '}') {
+            if (stack.isEmpty()) return false;
+            else stack.pop();
+        }
+    }
+
+    if (not stack.isEmpty()) return false;
+    return true;
 }
 
 void testAreCurleyBracesMatched() {
@@ -191,8 +220,20 @@ void testAreCurleyBracesMatched() {
 };
 
 bool isPalindrome(const string& inputString) {
-    // TODO
-    return false;
+    int i = 0;
+    int l = inputString.length();
+    ArrayStack<char, MIN_ARRAY_SIZE> stack;
+    while (i < l / 2) {
+        stack.push(inputString[i]);
+        i++;
+    }
+    if (l % 2 == 1) i++;
+    while (i < l) {
+        if (stack.peek() != inputString[i]) return false;
+        stack.pop();
+        i++;
+    }
+    return true;
 }
 
 void testIsPalindrome() {
@@ -206,8 +247,16 @@ void testIsPalindrome() {
 }
 
 string reversedString(const string& inputString) {
-    // TODO
-    return {};
+    ListStack<char> wordStack;
+    for (int i = 0; i < inputString.length(); i++) {
+        wordStack.push(inputString[i]);
+    }
+    string outputString;
+    while (not wordStack.isEmpty()) {
+        outputString += wordStack.peek();
+        wordStack.pop();
+    }
+    return outputString;
 }
 
 void testReversedString() {
@@ -239,8 +288,37 @@ bool isOperand(char ch) {
 }
 
 string infixToPostFix(const string& infix) {
-    // TODO
-    return {};
+    ArrayStack<char, MIN_ARRAY_SIZE> opStack;
+    string postfix;
+    for (int i = 0; i < infix.length(); i++) {
+        char thisChar = infix[i];
+        if (isOperand(thisChar)) {
+            postfix += thisChar;
+        }
+        else if (thisChar == '(') {
+            opStack.push(thisChar);
+        }
+        else if (isOperator(thisChar)) {
+            while (not opStack.isEmpty() and opStack.peek() != '(' and precedence(thisChar) <= precedence(opStack.peek())) {
+                postfix += opStack.peek();
+                opStack.pop();
+            }
+            opStack.push(thisChar);
+        }
+        else if (thisChar == ')') {
+            while (opStack.peek() != '(') {
+                postfix += opStack.peek();
+                opStack.pop();
+            }
+            opStack.pop();
+        }
+    }
+
+    while (not opStack.isEmpty()) {
+        postfix += opStack.peek();
+        opStack.pop();
+    }
+    return postfix;
 }
 
 void testInfixToPostFix() {
@@ -262,6 +340,107 @@ void testInfixToPostFix() {
     assert(infixToPostFix("((a*b)+c)") == "ab*c+");
 }
 
+class QueensBoard {
+private:
+    int queens[8][2]; // spaces containing queens
+    int topIndex = -1; // top of the "stack" (can't use an actual stack, but queens will be added in a stack-like fashion)
+public:
+    // returns true if given space has a queen
+    bool hasQueen(int x, int y) {
+        for (int i = 0; i <= topIndex; i++) {
+            if (queens[i][0] == x and queens[i][1] == y) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // adds a queen to the given space; throws an exception if there is a queen there
+    void addQueen(int x, int y) {
+        if (hasQueen(x, y)) throw logic_error("Adding queen on an occupied square");
+        topIndex += 1;
+        queens[topIndex][0] = x;
+        queens[topIndex][1] = y;
+        
+    }
+
+    // removes the queen at the given space; throws an exception if there is no queen there
+    void removeQueen(int x, int y) {
+        for (int i = 0; i <= topIndex; i++) {
+            if (queens[i][0] == x and queens[i][1] == y) {
+                queens[i][0] = queens[topIndex][0];
+                queens[i][1] = queens[topIndex][1];
+                topIndex -= 1;
+                return;
+            }
+        }
+        throw logic_error("Removing queen from an empty square");
+    }
+
+    // returns true if selected space is attacked by a queen
+    bool isAttacked(int x, int y) {
+        for (int i = 0; i <= topIndex; i++) {
+            if (queens[i][0] == x || queens[i][1] == y || abs(queens[i][0] - x) == abs(queens[i][1] - y)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // returns list of all spaces containing queens in algebraic notation
+    string listQueens() {
+        string out;
+        for (int i = 0; i <= topIndex; i++) {
+            out += char(queens[i][0] + int('a'));
+            out += to_string(queens[i][1] + 1);
+            out += "\n";
+        }
+        return out;
+    }
+};
+
+void testQueensBoard() {
+    QueensBoard testBoard;
+    testBoard.addQueen(1, 5);
+    testBoard.addQueen(5, 5);
+    testBoard.addQueen(6, 2);
+    testBoard.addQueen(2, 1);
+    testBoard.removeQueen(6, 2);
+    assert(testBoard.hasQueen(1, 5));
+    assert(!testBoard.hasQueen(4, 3));
+    assert(!testBoard.hasQueen(6, 2));
+    assert(testBoard.isAttacked(2, 5));
+    assert(!testBoard.isAttacked(6, 7));
+    cout << testBoard.listQueens();
+}
+
+// returns list of eight queens in algebraic chess notation
+string solveEightQueens() {
+    QueensBoard board;
+    ListStack<int> queensYStack;
+    int currentX = 0;
+    int currentY = 0;
+    while (currentX < 8) {
+        // backtrack if all 8 squares in the column have been checked
+        if (currentY >= 8) {
+            currentX -= 1;
+            currentY = queensYStack.peek();
+            board.removeQueen(currentX, currentY);
+            queensYStack.pop();
+        }
+        // if currently checked square is not attacked, place a queen
+        else if (!board.isAttacked(currentX, currentY)) {
+            board.addQueen(currentX, currentY); 
+            queensYStack.push(currentY);
+            currentX += 1;
+            currentY = -1;
+        }
+        currentY += 1; // making sure Y is advanced after either a backtrack or an attacked square
+    }
+
+    return board.listQueens();
+}
+
 int main() {
     testArrayStack();
     testListStack();
@@ -269,5 +448,8 @@ int main() {
     testIsPalindrome();
     testReversedString();
     testInfixToPostFix();
+
+    testQueensBoard();
+    cout << solveEightQueens();
     return 0;
 }

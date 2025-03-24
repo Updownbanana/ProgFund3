@@ -397,6 +397,25 @@ public:
         }
         return out;
     }
+
+    // returns ascii representation of the full chessboard, with empty spaces as . and queens as Q
+    string toAscii() {
+        string out;
+        for (int i = 0; i < 8; i++) {
+            out += to_string(i + 1);
+            for (int j = 0; j < 8; j++) {
+                if (hasQueen(i, j)) {
+                    out += 'Q';
+                }
+                else {
+                    out += '.';
+                }
+            }
+            out += '\n';
+        }
+        out += " ABCDEFGH";
+        return out;
+    }
 };
 
 void testQueensBoard() {
@@ -411,7 +430,8 @@ void testQueensBoard() {
     assert(!testBoard.hasQueen(6, 2));
     assert(testBoard.isAttacked(2, 5));
     assert(!testBoard.isAttacked(6, 7));
-    cout << testBoard.listQueens();
+    assert(testBoard.isAttacked(3, 0));
+    assert(testBoard.listQueens() == "b6\nf6\nc2\n");
 }
 
 // returns list of eight queens in algebraic chess notation
@@ -438,7 +458,7 @@ string solveEightQueens() {
         currentY += 1; // making sure Y is advanced after either a backtrack or an attacked square
     }
 
-    return board.listQueens();
+    return board.toAscii();
 }
 
 int main() {

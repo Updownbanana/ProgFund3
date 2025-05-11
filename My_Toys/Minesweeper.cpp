@@ -1,4 +1,5 @@
 #include "MinesweeperBoard.h"
+#include "MinesweeperGame.h"
 #include <ctime>
 #include <cassert>
 using namespace std;
@@ -26,7 +27,7 @@ MinesweeperBoard::MinesweeperBoard(const int w, const int h, const int m) {
 
 // method for randomly placing the set number of mines in an empty grid
 void MinesweeperBoard::placeMines() {
-	srand((unsigned) time(0));
+	srand((unsigned)time(0));
 	int x = rand() % width;
 	int y = rand() % height;
 	for (int m = 0; m < mineCount; m++) {
@@ -35,8 +36,8 @@ void MinesweeperBoard::placeMines() {
 			y = rand() % height;
 		}
 		grid[x][y] = -1;
-		for (int i = max(x-1, 0); i <= min(x+1, width-1); i++) {
-			for (int j = max(y - 1, 0); j <= min(y+1, height-1); j++) {
+		for (int i = max(x - 1, 0); i <= min(x + 1, width - 1); i++) {
+			for (int j = max(y - 1, 0); j <= min(y + 1, height - 1); j++) {
 				if (grid[i][j] >= 0) {
 					grid[i][j]++;
 				}
@@ -75,4 +76,55 @@ string MinesweeperBoard::toString() const {
 		out.append("\n");
 	}
 	return out;
+}
+
+
+MinesweeperGame::MinesweeperGame() {
+	board = MinesweeperBoard();
+	revealedGrid = { {} };
+	gameWon = false;
+	gameLost = false;
+	revealCount = 0;
+}
+
+MinesweeperGame::MinesweeperGame(const int width, const int height, const int mineCount) {
+	board = MinesweeperBoard(width, height, mineCount);
+	for (int i = 0; i < height; i++) {
+		vector<bool> new_row(width, false);
+		revealedGrid.push_back(new_row);
+	}
+	gameWon = false;
+	gameLost = false;
+	revealCount = 0;
+}
+
+bool MinesweeperGame::revealSquare(const int x, const int y) {
+	revealedGrid[x][y] = true;
+	if (board.getSquare(x, y) < 0) {
+		gameLost = true;
+		return true;
+	}
+	revealCount++;
+	checkWin();
+}
+
+bool MinesweeperGame::getSquareRevealed(const int x, const int y) {
+	return revealedGrid[x][y];
+}
+
+bool MinesweeperGame::getGameLost() {
+	return gameLost;
+}
+
+bool MinesweeperGame::getGameWon() {
+	return gameWon;
+}
+
+void MinesweeperGame::checkWin() {
+	if (revealCount + board.getMineCount() == board.getWidth() * board.getHeight() and not gameLost) {
+		gameWon = true;
+	}
+	else {
+		gameWon = false;
+	}
 }

@@ -9,7 +9,7 @@
 // is modified. Keep in mind these methods can return nullptr at various times, and we need to think about how the
 // values join back together.
 
-// Part 1: Finish implementing the methods stubbed and marked with TODO's. There are a few miscellaneous functions to
+// Part 1: Finish implementing the methods stubbed and marked with TO DO's. There are a few miscellaneous functions to
 //         finish like isLeaf. The main focus is on remove methods. You will need to implement the remove
 //         for a regular binary tree and then also for the binary search tree which maintains an ordering.
 
@@ -64,7 +64,7 @@ public:
     }
 
     bool isLeaf() const {
-        if (leftPtr == nullptr and rightPtr == nullptr) 
+        if (leftChildPtr == nullptr and rightChildPtr == nullptr) 
             return true;
         return false;
     }
@@ -159,7 +159,7 @@ protected:
     int getHeightHelper(std::shared_ptr<BinaryNode<ItemType>> subTreePtr) const
     {
         if (subTreePtr == nullptr)
-            return 1;
+            return 0;
         int left = getHeightHelper(subTreePtr->getLeftChildPtr()) + 1;
         int right = getHeightHelper(subTreePtr->getRightChildPtr()) + 1;
         return std::max(left, right);
@@ -178,8 +178,15 @@ protected:
     {
         if (subTreePtr == nullptr)
             return newNodePtr;
-        // TODO:
-        return {};
+        auto leftPtr = subTreePtr->getLeftChildPtr();
+        auto rightPtr = subTreePtr->getRightChildPtr();
+        if (getNumberOfNodesHelper(leftPtr) > getNumberOfNodesHelper(rightPtr)) {
+            subTreePtr->setRightChildPtr(balancedAdd(rightPtr, newNodePtr));
+        }
+        else {
+            subTreePtr->setLeftChildPtr(balancedAdd(leftPtr, newNodePtr));
+        }
+        return subTreePtr;
     }  // end balancedAdd
 
     // Here is one way of going about it: https://www.geeksforgeeks.org/deletion-binary-tree/
@@ -208,7 +215,10 @@ protected:
         }
 
         // TODO:
-        return {};
+        auto leftSearch = findNode(treePtr->getLeftChildPtr(), target);
+        if (leftSearch)
+            return leftSearch;
+        return findNode(treePtr->getRightChildPtr(), target);
     }
 
     // Copies the tree rooted at treePtr and returns a pointer to the root of the copy.
@@ -480,9 +490,27 @@ void treeSort(ItemType array_in[], int array_size) {
 
 int main()
 {
-    BinaryNodeTree<int> bnt;
+    BinaryNodeTree<int> bnt(1);
+    BinaryNodeTree<int> bnt2;
 
     // TODO: Place BinaryNodeTree tests here.
+    assert(bnt2.isEmpty());
+    assert(bnt2.getHeight() == 0);
+    assert(bnt2.getNumberOfNodes() == 0);
+    assert(not bnt.isEmpty());
+    assert(bnt.getHeight() == 1);
+    assert(bnt.getNumberOfNodes() == 1);
+    bnt.add(2);
+    assert(bnt.getHeight() == 2);
+    assert(bnt.getNumberOfNodes() == 2);
+    bnt.add(3);
+    bnt.add(4);
+    bnt.add(5);
+    bnt.add(6);
+    bnt.add(7);
+    assert(bnt.getHeight() == 3);
+    assert(bnt.contains(3));
+    assert(not bnt.contains(10));
 
     BinarySearchTree<int> bst;
 
